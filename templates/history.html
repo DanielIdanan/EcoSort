@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EcoSort History</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/history.css') }}">
+  <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/history.js') }}"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+  <div class="page-wrapper">
+    <div class="mobile-frame">
+
+      <div class="brand-panel">
+        <div class="overlay-shape shape-1"></div>
+        <div class="overlay-shape shape-2"></div>
+
+        <div class="brand-content">
+          <div class="brand-logo-wrap">
+            <i class="fa-solid fa-recycle rotating-logo big-logo"></i>
+          </div>
+          <h1>EcoSort</h1>
+          <p>Your waste classification history</p>
+        </div>
+      </div>
+
+      <div class="login-panel">
+        <div class="login-card fade-up history-card">
+          <h2>Scan History</h2>
+          <p class="subtitle">
+            {% if filter_type != 'all' %}
+              <span class="filter-badge">
+                <i class="fa-solid fa-filter"></i>
+                {{ filter_title }}
+              </span>
+              <a href="{{ url_for('history') }}" class="clear-filter-btn">
+                <i class="fa-solid fa-times"></i> Clear Filter
+              </a>
+            {% else %}
+              Click any image to see Reduce, Reuse, Recycle analysis
+            {% endif %}
+          </p>
+
+          {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+          {% for category, message in messages %}
+          <div class="flash-message {{ category }}">
+            {{ message }}
+          </div>
+          {% endfor %}
+          {% endif %}
+          {% endwith %}
+
+          <div class="history-list">
+            {% if scans %}
+              {% for scan in scans %}
+              <div class="history-item" onclick="openModal('{{ scan[1] }}', '{{ scan[2] }}', '{{ scan[3] }}', '{{ scan[4] }}', '{{ scan[5] }}')">
+                <div class="history-top">
+                  <img src="{{ url_for('static', filename=scan[1]) }}" alt="Scanned Waste">
+                  <span class="click-hint"><i class="fa-solid fa-expand"></i> Click to analyze</span>
+                </div>
+                <div class="history-details">
+                  <p><strong>Prediction:</strong> {{ scan[2] }}</p>
+                  <p><strong>Confidence:</strong> {{ scan[3] }}</p>
+                  <p><strong>Scanned at:</strong> {{ scan[5] }}</p>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="empty-state">
+                <i class="fa-solid fa-box-open"></i>
+                <p>No scans found for this category.</p>
+                {% if filter_type != 'all' %}
+                  <a href="{{ url_for('history') }}" style="color: #86efac; margin-top: 10px; display: inline-block;">View all scans</a>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="action-buttons" style="margin-top: 20px;">
+            <a href="{{ url_for('index') }}" class="login-btn action-link">
+              <i class="fa-solid fa-house"></i> Back to Home
+            </a>
+            <a href="{{ url_for('logout') }}" class="social-btn action-icon" title="Logout">
+              <i class="fa-solid fa-right-from-bracket"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal for RRR Analysis -->
+  <div id="analysisModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-chart-pie"></i> Waste Analysis</h3>
+        <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <img id="modalImage" class="modal-image" src="" alt="Waste Item">
+      <div class="history-details" style="margin-bottom: 15px;">
+        <p><strong>AI Prediction:</strong> <span id="modalPrediction"></span></p>
+        <p><strong>Confidence:</strong> <span id="modalConfidence"></span></p>
+        <p><strong>Date:</strong> <span id="modalDate"></span></p>
+      </div>
+      <div class="rrr-section">
+        <div class="rrr-card reduce" id="reduceCard">
+          <i class="fa-solid fa-minimize"></i>
+          <h4>Reduce</h4>
+          <div class="percentage" id="reducePercent">0%</div>
+        </div>
+        <div class="rrr-card reuse" id="reuseCard">
+          <i class="fa-solid fa-rotate"></i>
+          <h4>Reuse</h4>
+          <div class="percentage" id="reusePercent">0%</div>
+        </div>
+        <div class="rrr-card recycle" id="recycleCard">
+          <i class="fa-solid fa-recycle"></i>
+          <h4>Recycle</h4>
+          <div class="percentage" id="recyclePercent">0%</div>
+        </div>
+      </div>
+      <div class="tip-box" style="margin-top: 20px;">
+        <i class="fa-solid fa-lightbulb"></i>
+        <p id="modalTip"></p>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>

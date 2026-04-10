@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EcoSort Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+  <div id="splash-screen">
+    <div class="splash-content">
+      <div class="logo-circle">
+        <i class="fa-solid fa-recycle rotating-logo"></i>
+      </div>
+      <h1 class="splash-title">EcoSort</h1>
+      <p class="splash-subtitle">Reduce. Reuse. Recycle.</p>
+
+      <div class="loader-bar">
+        <div class="loader-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-wrapper hidden" id="main-content">
+    <div class="mobile-frame">
+
+      <div class="brand-panel">
+        <div class="overlay-shape shape-1"></div>
+        <div class="overlay-shape shape-2"></div>
+
+        <div class="brand-content">
+          <div class="brand-logo-wrap">
+            <i class="fa-solid fa-recycle rotating-logo big-logo"></i>
+          </div>
+          <h1>EcoSort</h1>
+          <p>Smart waste classification made simple.</p>
+        </div>
+      </div>
+
+      <div class="login-panel">
+        <div class="login-card fade-up">
+          <h2>Welcome Back</h2>
+          <p class="subtitle">Login to continue using EcoSort</p>
+
+          {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+          {% for category, message in messages %}
+          <div class="flash-message {{ category }}">
+            {{ message }}
+          </div>
+          {% endfor %}
+          {% endif %}
+          {% endwith %}
+
+          <form method="POST" action="{{ url_for('login') }}">
+            <div class="input-group">
+              <label>Email</label>
+              <div class="input-box">
+                <i class="fa-regular fa-envelope"></i>
+                <input type="email" name="email" placeholder="Enter your email" required>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label>Password</label>
+              <div class="input-box">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" name="password" placeholder="Enter your password" required>
+              </div>
+            </div>
+
+            <div class="extra-row">
+              <a href="{{ url_for('forgot_password') }}">Forgot Password?</a>
+            </div>
+
+            <button type="submit" class="login-btn">Login</button>
+          </form>
+
+          <div class="divider">
+            <span>or continue with</span>
+          </div>
+
+          <div class="social-login social-login-wide">
+            <a href="{{ url_for('google_login') }}" class="social-login-btn google-login-btn">
+              <i class="fa-brands fa-google"></i>
+              <span>Continue with Google</span>
+            </a>
+
+            <a href="{{ url_for('facebook_login') }}" class="social-login-btn facebook-login-btn">
+              <i class="fa-brands fa-facebook-f"></i>
+              <span>Continue with Facebook</span>
+            </a>
+          </div>
+
+          <div class="register-link">
+            <p>Don’t have an account yet? <a href="{{ url_for('register') }}">Register here</a></p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+
+</html>

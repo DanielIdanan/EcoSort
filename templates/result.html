@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EcoSort Result</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+  <div class="page-wrapper">
+    <div class="mobile-frame">
+
+      <div class="brand-panel">
+        <div class="overlay-shape shape-1"></div>
+        <div class="overlay-shape shape-2"></div>
+
+        <div class="brand-content">
+          <div class="brand-logo-wrap">
+            <i class="fa-solid fa-recycle rotating-logo big-logo"></i>
+          </div>
+          <h1>EcoSort</h1>
+          <p>Waste classification result</p>
+        </div>
+      </div>
+
+      <div class="login-panel">
+        <div class="login-card fade-up">
+          <h2>Scan Result</h2>
+          <p class="subtitle">Here is the AI classification result</p>
+
+          <div class="result-image-box">
+            <img src="{{ url_for('static', filename=image) }}" alt="Scanned Waste">
+          </div>
+
+          <div class="result-info">
+            <div class="result-row">
+              <span class="result-label">Prediction</span>
+              <span class="result-value">{{ prediction }}</span>
+            </div>
+
+            <div class="result-row">
+              <span class="result-label">Confidence</span>
+              <span class="result-value">{{ confidence }}</span>
+            </div>
+
+            <div class="tip-box">
+              <i class="fa-solid fa-lightbulb"></i>
+              <p>{{ tip }}</p>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <a href="{{ url_for('index') }}" class="login-btn action-link">Scan Again</a>
+            <a href="{{ url_for('history') }}" class="social-btn action-icon" title="View History">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </a>
+            <a href="{{ url_for('logout') }}" class="social-btn action-icon" title="Logout">
+              <i class="fa-solid fa-right-from-bracket"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EcoSort Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/index.js') }}"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+  <div class="page-wrapper">
+    <div class="mobile-frame">
+
+      <div class="brand-panel">
+        <div class="overlay-shape shape-1"></div>
+        <div class="overlay-shape shape-2"></div>
+
+        <div class="brand-content">
+          <div class="brand-logo-wrap">
+            <i class="fa-solid fa-recycle rotating-logo big-logo"></i>
+          </div>
+          <h1>EcoSort</h1>
+          <p>Upload a waste image and let AI classify it.</p>
+        </div>
+      </div>
+
+      <div class="login-panel">
+        <div class="login-card fade-up dashboard-card">
+          <h2>Hello, {{ user_name }}</h2>
+          <p class="subtitle">Upload an image to scan your waste item</p>
+
+          <form method="POST" action="{{ url_for('index') }}" enctype="multipart/form-data">
+            <div class="upload-box" id="uploadBox">
+              <input type="file" name="image" id="imageInput" accept="image/*" required hidden>
+              <label for="imageInput" class="upload-label">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span>Click to upload an image</span>
+                <small>JPG, PNG, JPEG</small>
+              </label>
+            </div>
+
+            <div class="preview-box" id="previewBox" style="display: none;">
+              <img id="previewImage" src="" alt="Preview">
+            </div>
+
+            <button type="submit" class="login-btn scan-btn">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              Scan Waste
+            </button>
+          </form>
+
+          <div class="quick-actions">
+            <a href="{{ url_for('history') }}" class="social-btn action-icon" title="History">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </a>
+
+            <a href="{{ url_for('logout') }}" class="social-btn action-icon" title="Logout">
+              <i class="fa-solid fa-right-from-bracket"></i>
+            </a>
+          </div>
+
+          <div class="dashboard-tips">
+            <div class="tip-mini reduce" onclick="handleRRRButtonClick(this, 'reduce')">
+              <i class="fa-solid fa-leaf" style="color: #f59e0b;"></i>
+              <span>Reduce</span>
+              <small class="category-label">Non-recyclable</small>
+              <i class="fa-solid fa-arrow-right click-indicator"></i>
+            </div>
+            <div class="tip-mini reuse" onclick="handleRRRButtonClick(this, 'reuse')">
+              <i class="fa-solid fa-rotate" style="color: #3b82f6;"></i>
+              <span>Reuse</span>
+              <small class="category-label">Biodegradable</small>
+              <i class="fa-solid fa-arrow-right click-indicator"></i>
+            </div>
+            <div class="tip-mini recycle" onclick="handleRRRButtonClick(this, 'recycle')">
+              <i class="fa-solid fa-recycle" style="color: #22c55e;"></i>
+              <span>Recycle</span>
+              <small class="category-label">Recyclable</small>
+              <i class="fa-solid fa-arrow-right click-indicator"></i>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+
+</html>
