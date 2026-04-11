@@ -474,4 +474,6 @@ def history():
 
 if __name__ == "__main__":
     init_db()
-    app.run(debug=True, host="localhost", port=8000)
+    # Use PORT from environment variable for Render
+    port = int(os.environ.get("PORT", 8000))
+    app.run(host="0.0.0.0", port=port, debug=False)
