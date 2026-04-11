@@ -8,7 +8,7 @@ from authlib.integrations.flask_client import OAuth
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image as keras_image
 
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # only for local development
+#os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # only for local development
 
 app = Flask(__name__)
 app.secret_key = "ecosort_secret_key"
