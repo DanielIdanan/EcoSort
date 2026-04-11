@@ -29,9 +29,29 @@ DATABASE = "database.db"
 
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
+# ========== MODIFIED MODEL LOADING ==========
 MODEL_PATH = "model/waste_model.h5"
+
+# Check if model exists, if not train it
+if not os.path.exists(MODEL_PATH):
+    print("=" * 50)
+    print("Model not found! Training new model...")
+    print("=" * 50)
+    
+    # Create model directory
+    os.makedirs("model", exist_ok=True)
+    
+    # Run training script
+    import train_model
+    
+    print("=" * 50)
+    print("Model training complete!")
+    print("=" * 50)
+
+# Now load the model
 model = load_model(MODEL_PATH)
 class_names = ["biodegradable", "non_recyclable", "recyclable"]
+# ========== END MODIFIED SECTION ==========
 
 
 def get_db_connection():
