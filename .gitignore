@@ -1,7 +1,7 @@
-﻿settup.env
-.env
 __pycache__/
 *.pyc
+.env
+settup.env
 database.db
-model/waste_model.h5
 static/uploads/
+
