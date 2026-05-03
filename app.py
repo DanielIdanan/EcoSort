@@ -33,8 +33,8 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 # ===================== MODEL LOADING =====================
 
-MODEL_PATH = "model/waste_model.keras"
-GDRIVE_FILE_ID = "1GiRiGt6-FcIBxBzYYV17gkbvXQate4ed"
+MODEL_PATH = "model/waste_model.h5"
+GDRIVE_FILE_ID = "18Pt5uWKJKo44BNtA3OOX5eMEGKoClM02"
 
 def download_model_from_gdrive(file_id, dest_path):
     import requests
