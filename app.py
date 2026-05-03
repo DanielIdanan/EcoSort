@@ -11,16 +11,15 @@ from tensorflow.keras.preprocessing import image as keras_image
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "ecosort_secret_key_change_in_prod")
 
-# Fix redirect URIs when behind a proxy (Render uses HTTPS)
+# ProxyFix: makes url_for() generate https:// on Render (required by Google/Facebook).
 from werkzeug.middleware.proxy_fix import ProxyFix
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-app.config["SESSION_TYPE"] = "filesystem"
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=10)
-app.config["SESSION_COOKIE_SECURE"] = False  # Set to True when using HTTPS
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
+# Keep False locally; on Render add env var SESSION_COOKIE_SECURE=true
+app.config["SESSION_COOKIE_SECURE"] = os.environ.get("SESSION_COOKIE_SECURE", "false").lower() == "true"
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-app.config["PREFERRED_URL_SCHEME"] = "https"
 
 @app.before_request
 def make_session_permanent():
@@ -148,22 +147,24 @@ oauth = OAuth(app)
 
 google = oauth.register(
     name="google",
-    client_id=os.environ.get("GOOGLE_CLIENT_ID", "99512363553-c6vpqhkhitvt2cn8ralo9h04gkk474uk.apps.googleusercontent.com"),
-    client_secret=os.environ.get("GOOGLE_CLIENT_SECRET", "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"),
+    client_id=os.environ.get("GOOGLE_CLIENT_ID"),
+    client_secret=os.environ.get("GOOGLE_CLIENT_SECRET"),
     server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
-    client_kwargs={"scope": "openid email profile"},
+    client_kwargs={
+        "scope": "openid email profile",
+        "token_endpoint_auth_method": "client_secret_post",
+    },
 )
 
 facebook = oauth.register(
     name="facebook",
-    client_id=os.environ.get("FACEBOOK_CLIENT_ID", "2133400210781599"),
-    client_secret=os.environ.get("FACEBOOK_CLIENT_SECRET", "c14a167529f2c2d332731790d1344f5d"),
+    client_id=os.environ.get("FACEBOOK_CLIENT_ID"),
+    client_secret=os.environ.get("FACEBOOK_CLIENT_SECRET"),
     access_token_url="https://graph.facebook.com/oauth/access_token",
     authorize_url="https://www.facebook.com/dialog/oauth",
-    api_base_url="https://graph.facebook.com/",
-    userinfo_endpoint="https://graph.facebook.com/me?fields=id,name,email",
+    api_base_url="https://graph.facebook.com/v18.0/",
     client_kwargs={
-        "scope": "email public_profile",
+        "scope": "email,public_profile",
         "token_endpoint_auth_method": "client_secret_post",
     },
 )
@@ -257,25 +258,25 @@ def forgot_password():
 
 @app.route("/login/google")
 def google_login():
-    if not (os.environ.get("GOOGLE_CLIENT_ID") or "99512363553" in "99512363553-c6vpqhkhitvt2cn8ralo9h04gkk474uk.apps.googleusercontent.com"):
-        flash("Google OAuth credentials are missing.", "error")
-        return redirect(url_for("login"))
-
     redirect_uri = url_for("google_callback", _external=True)
-    return google.authorize_redirect(redirect_uri)
+    # nonce is required for OIDC id_token validation
+    return google.authorize_redirect(redirect_uri, nonce=os.urandom(16).hex())
 
 
 @app.route("/login/google/callback")
 def google_callback():
     try:
         token = google.authorize_access_token()
-        user_info = token.get("userinfo") or google.get("https://www.googleapis.com/oauth2/v3/userinfo", token=token).json()
+        # id_token userinfo is faster and avoids an extra API call
+        user_info = token.get("userinfo")
+        if not user_info:
+            user_info = google.parse_id_token(token, nonce=None)
 
         email = user_info.get("email")
-        name = user_info.get("name", "Google User")
+        name  = user_info.get("name", "Google User")
 
         if not email:
-            flash("Google login failed — email not provided.", "error")
+            flash("Google login failed — no email returned.", "error")
             return redirect(url_for("login"))
 
         user = find_or_create_oauth_user(name, email)
@@ -299,15 +300,25 @@ def facebook_login():
 def facebook_callback():
     try:
         token = facebook.authorize_access_token()
-        resp = facebook.get("me?fields=id,name,email", token=token)
+        # Fetch user info directly — Authlib's Facebook userinfo_endpoint is unreliable
+        resp = facebook.get(
+            "https://graph.facebook.com/v18.0/me",
+            token=token,
+            params={"fields": "id,name,email"}
+        )
         profile = resp.json()
 
-        if not profile or "email" not in profile:
-            flash("Facebook login failed — email not provided. Make sure your Facebook account has a verified email.", "error")
-            return redirect(url_for("login"))
-
         email = profile.get("email")
-        name = profile.get("name", "Facebook User")
+        name  = profile.get("name", "Facebook User")
+
+        if not email:
+            flash(
+                "Facebook login failed — email not returned. "
+                "Make sure your Facebook account has a confirmed email address "
+                "and that the app has been granted email permission.",
+                "error"
+            )
+            return redirect(url_for("login"))
 
         user = find_or_create_oauth_user(name, email)
         login_user(user)
