@@ -34,34 +34,6 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 # ===================== MODEL LOADING =====================
 
 MODEL_PATH = "model/waste_model.h5"
-GDRIVE_FILE_ID = "18Pt5uWKJKo44BNtA3OOX5eMEGKoClM02"
-
-def download_model_from_gdrive(file_id, dest_path):
-    import requests
-    print("Downloading model from Google Drive...")
-    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-    url = f"https://drive.google.com/uc?export=download&id={file_id}"
-    session = requests.Session()
-    response = session.get(url, stream=True)
-
-    # Handle Google's virus scan warning for large files
-    token = None
-    for key, value in response.cookies.items():
-        if key.startswith("download_warning"):
-            token = value
-            break
-
-    if token:
-        response = session.get(url, params={"confirm": token}, stream=True)
-
-    with open(dest_path, "wb") as f:
-        for chunk in response.iter_content(chunk_size=32768):
-            if chunk:
-                f.write(chunk)
-    print("Model downloaded successfully.")
-
-if not os.path.exists(MODEL_PATH):
-    download_model_from_gdrive(GDRIVE_FILE_ID, MODEL_PATH)
 
 model = load_model(MODEL_PATH)
 class_names = ["biodegradable", "non_recyclable", "recyclable"]
