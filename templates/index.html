@@ -60,6 +60,14 @@
               <i class="fa-solid fa-clock-rotate-left"></i>
             </a>
 
+            <button class="social-btn action-icon" title="Junk Shop Map" onclick="openMapModal()">
+              <i class="fa-solid fa-map-location-dot"></i>
+            </button>
+
+            <button class="social-btn action-icon" title="About EcoSort" onclick="openAboutModal()">
+              <i class="fa-solid fa-circle-info"></i>
+            </button>
+
             <a href="{{ url_for('logout') }}" class="social-btn action-icon" title="Logout">
               <i class="fa-solid fa-right-from-bracket"></i>
             </a>
@@ -91,6 +99,178 @@
 
     </div>
   </div>
+
+
+  <!-- ===== ABOUT MODAL ===== -->
+  <div id="aboutModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-leaf"></i> About EcoSort</h3>
+        <button class="close-btn" onclick="closeAboutModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div style="text-align:center; margin-bottom:18px;">
+        <div class="brand-logo-wrap" style="margin:0 auto 14px; width:80px; height:80px; background:rgba(34,197,94,0.18);">
+          <i class="fa-solid fa-recycle rotating-logo" style="font-size:38px;"></i>
+        </div>
+        <h2 style="font-size:1.6rem; font-weight:800; margin-bottom:6px;">EcoSort</h2>
+        <p style="color:rgba(255,255,255,0.65); font-size:0.9rem; font-style:italic;">Reduce. Reuse. Recycle.</p>
+      </div>
+      <div class="about-section">
+        <div class="about-row">
+          <i class="fa-solid fa-brain" style="color:#22c55e;"></i>
+          <div>
+            <strong>AI-Powered Classification</strong>
+            <p>EcoSort uses a trained deep learning model to identify waste as Biodegradable, Recyclable, or Non-recyclable — just from a photo.</p>
+          </div>
+        </div>
+        <div class="about-row">
+          <i class="fa-solid fa-recycle" style="color:#3b82f6;"></i>
+          <div>
+            <strong>The 3R Framework</strong>
+            <p>Every scan gives you actionable Reduce, Reuse, and Recycle guidance tailored to the type of waste detected.</p>
+          </div>
+        </div>
+        <div class="about-row">
+          <i class="fa-solid fa-clock-rotate-left" style="color:#f59e0b;"></i>
+          <div>
+            <strong>Scan History</strong>
+            <p>All your scans are saved so you can track your environmental impact and review past classifications anytime.</p>
+          </div>
+        </div>
+        <div class="about-row">
+          <i class="fa-solid fa-map-location-dot" style="color:#e879f9;"></i>
+          <div>
+            <strong>Local Junk Shop Locator</strong>
+            <p>Find nearby junk shops and recycling drop-off points in Olongapo City so you can properly dispose of recyclable waste.</p>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center; margin-top:20px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.1);">
+        <p style="color:rgba(255,255,255,0.5); font-size:0.8rem;">Made with 💚 for a cleaner environment</p>
+        <p style="color:rgba(255,255,255,0.35); font-size:0.75rem; margin-top:4px;">Version 1.0 · EcoSort Team</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAP MODAL ===== -->
+  <div id="mapModal" class="modal">
+    <div class="modal-content" style="max-width:600px;">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-map-location-dot"></i> Junk Shops — Olongapo City</h3>
+        <button class="close-btn" onclick="closeMapModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p style="color:rgba(255,255,255,0.6); font-size:0.85rem; margin-bottom:14px; text-align:center;">
+        <i class="fa-solid fa-circle-info" style="color:#22c55e;"></i>
+        Tap a pin to see details. Bring your recyclables here!
+      </p>
+      <div id="ecosortMap" style="width:100%; height:320px; border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,0.12);"></div>
+      <div id="shopList" style="margin-top:16px; display:flex; flex-direction:column; gap:10px;"></div>
+    </div>
+  </div>
+
+  <script>
+    // ===== ABOUT MODAL =====
+    function openAboutModal() {
+      document.getElementById('aboutModal').style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+    function closeAboutModal() {
+      document.getElementById('aboutModal').style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+
+    // ===== MAP MODAL =====
+    const JUNK_SHOPS = [
+      { name: "Atew Junkshop", address: "25 Brill St, Olongapo City", lat: 14.8402091, lng: 120.2838133, phone: "+63 930 222 4791" },
+      { name: "GLO'S Junkshop", address: "25 Brill St, Olongapo City", lat: 14.8401493, lng: 120.2838005, phone: "+63 999 496 3632", rating: "⭐ 5.0" },
+      { name: "Thriftway Junkshop", address: "68 Fendler St, East Tapinac, Olongapo City", lat: 14.8325019, lng: 120.2843624, phone: "+63 949 371 0855" },
+      { name: "Pacleb Junk Shop", address: "191 New Cabalan, Olongapo City", lat: 14.8386389, lng: 120.2838176 },
+      { name: "Nickson Junkshop", address: "Block 14 Lot 1 Mayumi St, Olongapo City", lat: 14.8541131, lng: 120.2916457, phone: "+63 920 286 0483" },
+      { name: "Angeles Junkshop / Kleng Hauling", address: "2071 Purok 10, Old Cabalan, Olongapo City", lat: 14.849471, lng: 120.314867, phone: "+63 919 342 0326", rating: "⭐ 5.0", hours: "Mon–Sun 6AM–6PM" },
+    ];
+
+    let mapInitialized = false;
+
+    function openMapModal() {
+      document.getElementById('mapModal').style.display = 'block';
+      document.body.style.overflow = 'hidden';
+      if (!mapInitialized) {
+        loadLeafletMap();
+        buildShopList();
+        mapInitialized = true;
+      }
+    }
+
+    function closeMapModal() {
+      document.getElementById('mapModal').style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+
+    function loadLeafletMap() {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+      document.head.appendChild(link);
+
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+      script.onload = initMap;
+      document.head.appendChild(script);
+    }
+
+    function initMap() {
+      const map = L.map('ecosortMap').setView([14.843, 120.291], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+
+      const greenIcon = L.divIcon({
+        className: '',
+        html: `<div style="background:linear-gradient(135deg,#22c55e,#15803d);border:2px solid white;border-radius:50% 50% 50% 0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;transform:rotate(-45deg);box-shadow:0 3px 10px rgba(0,0,0,0.4);"><span style="transform:rotate(45deg);font-size:14px;">♻️</span></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -36]
+      });
+
+      JUNK_SHOPS.forEach(shop => {
+        const popup = `<div style="font-family:Arial,sans-serif;min-width:170px;">
+          <strong style="font-size:0.9rem;">${shop.name}</strong><br>
+          <span style="color:#555;font-size:0.8rem;">${shop.address}</span><br>
+          ${shop.phone ? `<span style="color:#16a34a;font-size:0.8rem;">📞 ${shop.phone}</span><br>` : ''}
+          ${shop.hours ? `<span style="color:#666;font-size:0.78rem;">🕐 ${shop.hours}</span><br>` : ''}
+          ${shop.rating ? `<span style="font-size:0.8rem;">${shop.rating}</span>` : ''}
+        </div>`;
+        L.marker([shop.lat, shop.lng], { icon: greenIcon }).addTo(map).bindPopup(popup);
+      });
+    }
+
+    function buildShopList() {
+      const container = document.getElementById('shopList');
+      JUNK_SHOPS.forEach(shop => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <div style="display:flex;align-items:flex-start;gap:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px;">
+            <div style="background:linear-gradient(135deg,#22c55e,#15803d);border-radius:10px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;">♻️</div>
+            <div style="flex:1;">
+              <strong style="font-size:0.88rem;color:white;">${shop.name}</strong>
+              ${shop.rating ? `<span style="font-size:0.76rem;color:#86efac;margin-left:6px;">${shop.rating}</span>` : ''}
+              <p style="color:rgba(255,255,255,0.55);font-size:0.78rem;margin-top:2px;">${shop.address}</p>
+              ${shop.phone ? `<p style="color:#86efac;font-size:0.78rem;margin-top:2px;">📞 ${shop.phone}</p>` : ''}
+              ${shop.hours ? `<p style="color:rgba(255,255,255,0.4);font-size:0.74rem;">${shop.hours}</p>` : ''}
+            </div>
+          </div>`;
+        container.appendChild(div);
+      });
+    }
+
+    window.addEventListener('click', function(e) {
+      if (e.target === document.getElementById('aboutModal')) closeAboutModal();
+      if (e.target === document.getElementById('mapModal')) closeMapModal();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') { closeAboutModal(); closeMapModal(); }
+    });
+  </script>
 
 </body>
 

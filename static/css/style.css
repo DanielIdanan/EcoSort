@@ -15,7 +15,8 @@ body {
   color: white;
 }
 
-/* Splash Screen */
+/* ===================== SPLASH SCREEN ===================== */
+
 #splash-screen {
   position: fixed;
   inset: 0;
@@ -86,7 +87,8 @@ body {
   animation: loadingBar 2.3s ease forwards;
 }
 
-/* Main page */
+/* ===================== LAYOUT ===================== */
+
 .page-wrapper {
   width: 100%;
   min-height: 100vh;
@@ -116,7 +118,8 @@ body {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
 }
 
-/* Left brand panel */
+/* ===================== BRAND PANEL ===================== */
+
 .brand-panel {
   position: relative;
   background: linear-gradient(160deg, #22c55e, #15803d);
@@ -183,7 +186,8 @@ body {
   margin: 0 auto;
 }
 
-/* Right login panel */
+/* ===================== LOGIN PANEL ===================== */
+
 .login-panel {
   display: flex;
   justify-content: center;
@@ -211,11 +215,18 @@ body {
 }
 
 .subtitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
   text-align: center;
   color: rgba(255, 255, 255, 0.78);
   margin-bottom: 24px;
   font-size: 0.95rem;
 }
+
+/* ===================== FORM ELEMENTS ===================== */
 
 .input-group {
   margin-bottom: 18px;
@@ -298,6 +309,32 @@ body {
   box-shadow: 0 12px 22px rgba(34, 197, 94, 0.32);
 }
 
+/* ===================== FLASH MESSAGES ===================== */
+
+.flash-message {
+  padding: 12px 14px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-size: 0.92rem;
+  text-align: center;
+  font-weight: 600;
+  animation: fadeUp 0.4s ease;
+}
+
+.flash-message.error {
+  background: rgba(239, 68, 68, 0.16);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fecaca;
+}
+
+.flash-message.success {
+  background: rgba(34, 197, 94, 0.14);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  color: #bbf7d0;
+}
+
+/* ===================== DIVIDER ===================== */
+
 .divider {
   margin: 22px 0 18px;
   text-align: center;
@@ -316,13 +353,10 @@ body {
   background: rgba(255, 255, 255, 0.2);
 }
 
-.divider::before {
-  left: 0;
-}
+.divider::before { left: 0; }
+.divider::after  { right: 0; }
 
-.divider::after {
-  right: 0;
-}
+/* ===================== SOCIAL LOGIN ===================== */
 
 .social-login {
   display: flex;
@@ -347,90 +381,74 @@ body {
   background: rgba(255, 255, 255, 0.18);
 }
 
-/* Smooth entrance */
-.fade-up {
-  animation: fadeUp 1s ease;
+.social-login-wide {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
 }
 
-/* Animations */
-@keyframes spinSmooth {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
+.social-login-btn {
+  width: 100%;
+  min-height: 52px;
+  border-radius: 14px;
+  padding: 14px 16px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: white;
 }
 
-@keyframes loadingBar {
-  0% {
-    width: 0%;
-  }
-
-  100% {
-    width: 100%;
-  }
+.social-login-btn i {
+  font-size: 1rem;
 }
 
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(35px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.google-login-btn {
+  background: rgba(255, 255, 255, 0.1);
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+.google-login-btn:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.18);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  body {
-    overflow-y: auto;
-  }
-
-  .page-wrapper {
-    padding: 16px;
-  }
-
-  .mobile-frame {
-    grid-template-columns: 1fr;
-    min-height: auto;
-    max-width: 420px;
-    border-radius: 26px;
-  }
-
-  .brand-panel {
-    min-height: 260px;
-  }
-
-  .brand-content h1 {
-    font-size: 2.2rem;
-  }
-
-  .login-panel {
-    padding: 20px;
-  }
-
-  .login-card {
-    max-width: 100%;
-    padding: 24px 18px;
-  }
+.facebook-login-btn {
+  background: rgba(37, 99, 235, 0.22);
 }
+
+.facebook-login-btn:hover {
+  transform: translateY(-2px);
+  background: rgba(37, 99, 235, 0.3);
+}
+
+/* ===================== REGISTER LINK ===================== */
+
+.register-link {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.register-link p {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.register-link a {
+  color: #86efac;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
+
+/* ===================== RESULT PAGE ===================== */
 
 .result-image-box {
   width: 100%;
@@ -517,6 +535,8 @@ body {
   flex-shrink: 0;
 }
 
+/* ===================== HISTORY PAGE ===================== */
+
 .history-card {
   max-width: 430px;
 }
@@ -535,6 +555,16 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 18px;
   overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.history-item:hover {
+  transform: translateY(-5px);
+}
+
+.history-top {
+  position: relative;
 }
 
 .history-top img {
@@ -559,6 +589,23 @@ body {
   margin-bottom: 0;
 }
 
+.click-hint {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.history-item:hover .click-hint {
+  opacity: 1;
+}
+
 .empty-state {
   text-align: center;
   padding: 28px 16px;
@@ -576,329 +623,42 @@ body {
   color: rgba(255, 255, 255, 0.8);
 }
 
-.dashboard-card {
-  max-width: 420px;
-}
-
-.upload-box {
-  width: 100%;
-  margin-bottom: 18px;
-}
-
-.upload-label {
-  width: 100%;
-  min-height: 170px;
-  border: 2px dashed rgba(255, 255, 255, 0.25);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.06);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+.filter-badge {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  text-align: center;
-  padding: 20px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.upload-label:hover {
-  border-color: #22c55e;
-  background: rgba(34, 197, 94, 0.08);
-  transform: translateY(-2px);
-}
-
-.upload-label i {
-  font-size: 2rem;
-  color: #86efac;
-}
-
-.upload-label span {
-  font-size: 1rem;
-  font-weight: 700;
-  color: white;
-}
-
-.upload-label small {
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 0.85rem;
-}
-
-.preview-box {
-  width: 100%;
-  margin-bottom: 18px;
-  border-radius: 18px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.preview-box img {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  display: block;
-}
-
-.scan-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 8px;
-}
-
-.quick-actions {
-  display: flex;
-  justify-content: center;
-  gap: 14px;
-  margin-top: 18px;
-}
-
-.dashboard-tips {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 22px;
-}
-
-.tip-mini {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 12px 10px;
-  text-align: center;
-  transition: all 0.3s ease;
-}
-
-.tip-mini:hover {
-  transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.tip-mini i {
-  display: block;
-  font-size: 1.1rem;
-  margin-bottom: 8px;
+  background: rgba(34, 197, 94, 0.2);
+  border: 1px solid rgba(34, 197, 94, 0.4);
   color: #86efac;
-}
-
-.tip-mini span {
-  font-size: 0.84rem;
-  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
   font-weight: 600;
+  margin-bottom: 15px;
 }
 
-.flash-message {
-  padding: 12px 14px;
-  border-radius: 12px;
-  margin-bottom: 16px;
-  font-size: 0.92rem;
-  text-align: center;
-  font-weight: 600;
-  animation: fadeUp 0.4s ease;
-}
-
-.flash-message.error {
-  background: rgba(239, 68, 68, 0.16);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #fecaca;
-}
-
-.flash-message.success {
-  background: rgba(34, 197, 94, 0.14);
-  border: 1px solid rgba(34, 197, 94, 0.35);
-  color: #bbf7d0;
-}
-
-.register-link {
-  margin-top: 18px;
-  text-align: center;
-}
-
-.register-link p {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.78);
-}
-
-.register-link a {
-  color: #86efac;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.register-link a:hover {
-  text-decoration: underline;
-}
-
-.facebook-btn:hover {
-  background: rgba(59, 130, 246, 0.18);
-}
-
-.google-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
-}
-
-.flash-message {
-  padding: 12px 14px;
-  border-radius: 12px;
-  margin-bottom: 16px;
-  font-size: 0.92rem;
-  text-align: center;
-  font-weight: 600;
-  animation: fadeUp 0.4s ease;
-}
-
-.flash-message.error {
-  background: rgba(239, 68, 68, 0.16);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #fecaca;
-}
-
-.flash-message.success {
-  background: rgba(34, 197, 94, 0.14);
-  border: 1px solid rgba(34, 197, 94, 0.35);
-  color: #bbf7d0;
-}
-
-.facebook-btn:hover {
-  background: rgba(59, 130, 246, 0.18);
-}
-
-.google-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
-}
-
-.social-login-wide {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 4px;
-}
-
-.social-login-btn {
-  width: 100%;
-  min-height: 52px;
-  border-radius: 14px;
-  padding: 14px 16px;
-  text-decoration: none;
-  display: flex;
+.clear-filter-btn {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-weight: 700;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-}
-
-.social-login-btn i {
-  font-size: 1rem;
-}
-
-.google-login-btn {
+  gap: 6px;
   background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
-}
-
-.google-login-btn:hover {
-  transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.16);
-}
-
-.facebook-login-btn {
-  background: rgba(37, 99, 235, 0.22);
-  color: white;
-}
-
-.facebook-login-btn:hover {
-  transform: translateY(-2px);
-  background: rgba(37, 99, 235, 0.3);
-}
-
-.social-login-wide {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.social-login-btn {
-  width: 100%;
-  min-height: 52px;
-  border-radius: 14px;
-  padding: 14px 16px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
   text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-weight: 700;
+  margin-left: 10px;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: white;
 }
 
-.google-login-btn {
-  background: rgba(255, 255, 255, 0.10);
+.clear-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
-.google-login-btn:hover {
-  transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.18);
-}
+/* ===================== MODAL ===================== */
 
-.facebook-login-btn {
-  background: rgba(37, 99, 235, 0.22);
-}
-
-.facebook-login-btn:hover {
-  transform: translateY(-2px);
-  background: rgba(37, 99, 235, 0.30);
-}
-
-.social-login-wide {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.social-login-btn {
-  width: 100%;
-  min-height: 52px;
-  border-radius: 14px;
-  padding: 14px 16px;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-weight: 700;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: white;
-}
-
-.facebook-login-btn {
-  background: rgba(37, 99, 235, 0.22);
-}
-
-.facebook-login-btn:hover {
-  transform: translateY(-2px);
-  background: rgba(37, 99, 235, 0.30);
-}
-
-.google-login-btn {
-  background: rgba(255, 255, 255, 0.10);
-}
-
-.google-login-btn:hover {
-  transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.18);
-}
-
-/* --------------------------------------------------------------------------------------------------------------------- */
-
-/* History Page Specific Styles */
-
-/* Modal Styles */
 .modal {
   display: none;
   position: fixed;
@@ -920,17 +680,6 @@ body {
   max-width: 500px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   animation: modalSlideIn 0.3s ease;
-}
-
-@keyframes modalSlideIn {
-  from { 
-    opacity: 0; 
-    transform: translateY(-50px); 
-  }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
-  }
 }
 
 .modal-header {
@@ -967,7 +716,8 @@ body {
   margin-bottom: 20px;
 }
 
-/* RRR Section Styles */
+/* ===================== RRR CARDS ===================== */
+
 .rrr-section {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -997,8 +747,8 @@ body {
   display: block;
 }
 
-.rrr-card.reduce i { color: #f59e0b; }
-.rrr-card.reuse i { color: #3b82f6; }
+.rrr-card.reduce i  { color: #f59e0b; }
+.rrr-card.reuse i   { color: #3b82f6; }
 .rrr-card.recycle i { color: #22c55e; }
 
 .rrr-card h4 {
@@ -1013,165 +763,12 @@ body {
   color: white;
 }
 
-/* History Item Styles */
-.history-item {
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
+/* ===================== DASHBOARD PAGE ===================== */
 
-.history-item:hover {
-  transform: translateY(-5px);
-}
-
-.click-hint {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.history-item:hover .click-hint {
-  opacity: 1;
-}
-
-.history-top {
-  position: relative;
-}
-
-/* Filter Badge Styles */
-.filter-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(34, 197, 94, 0.2);
-  border: 1px solid rgba(34, 197, 94, 0.4);
-  color: #86efac;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 15px;
-}
-
-.filter-badge a {
-  color: #86efac;
-  text-decoration: none;
-  margin-left: 8px;
-  font-size: 1rem;
-}
-
-.clear-filter-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  padding: 8px 14px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  text-decoration: none;
-  margin-left: 10px;
-  transition: all 0.3s ease;
-}
-
-.clear-filter-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
-}
-
-/* Subtitle spacing for filter display */
-.subtitle {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  justify-content: center;
-}
-
-/* --------------------------------------------------------------------------------------------------------------------- */
-
-/* Dashboard/Index Page Specific Styles */
-
-/* RRR Button Styles */
-.tip-mini {
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.tip-mini:hover {
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-}
-
-/* Shine effect on hover */
-.tip-mini::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: left 0.5s ease;
-}
-
-.tip-mini:hover::after {
-  left: 100%;
-}
-
-/* Color-specific hover states */
-.tip-mini.reduce:hover {
-  border-color: #f59e0b;
-  background: rgba(245, 158, 11, 0.2);
-}
-
-.tip-mini.reuse:hover {
-  border-color: #3b82f6;
-  background: rgba(59, 130, 246, 0.2);
-}
-
-.tip-mini.recycle:hover {
-  border-color: #22c55e;
-  background: rgba(34, 197, 94, 0.2);
-}
-
-/* Click indicator arrow */
-.click-indicator {
-  position: absolute;
-  bottom: 5px;
-  right: 5px;
-  font-size: 0.7rem;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.tip-mini:hover .click-indicator {
-  opacity: 1;
-}
-
-/* Category label styling */
-.category-label {
-  color: rgba(255,255,255,0.6);
-  font-size: 0.7rem;
-  display: block;
-  margin-top: 4px;
-}
-
-/* Dashboard card specific adjustments */
 .dashboard-card {
   max-width: 420px;
 }
 
-/* Upload box enhancements */
 .upload-box {
   width: 100%;
   margin-bottom: 18px;
@@ -1216,7 +813,6 @@ body {
   font-size: 0.85rem;
 }
 
-/* Preview box styles */
 .preview-box {
   width: 100%;
   margin-bottom: 18px;
@@ -1233,7 +829,6 @@ body {
   display: block;
 }
 
-/* Scan button with icon */
 .scan-btn {
   display: flex;
   align-items: center;
@@ -1241,7 +836,6 @@ body {
   gap: 8px;
 }
 
-/* Quick actions container */
 .quick-actions {
   display: flex;
   justify-content: center;
@@ -1249,7 +843,6 @@ body {
   margin-top: 18px;
 }
 
-/* Dashboard tips/RRR container */
 .dashboard-tips {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1257,20 +850,42 @@ body {
   margin-top: 22px;
 }
 
-/* RRR button base styles */
 .tip-mini {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   padding: 12px 10px;
   text-align: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
   transition: all 0.3s ease;
 }
 
 .tip-mini:hover {
-  transform: translateY(-2px);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   background: rgba(255, 255, 255, 0.12);
 }
+
+.tip-mini::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.tip-mini:hover::after {
+  left: 100%;
+}
+
+.tip-mini.reduce:hover  { border-color: #f59e0b; background: rgba(245, 158, 11, 0.2); }
+.tip-mini.reuse:hover   { border-color: #3b82f6; background: rgba(59, 130, 246, 0.2); }
+.tip-mini.recycle:hover { border-color: #22c55e; background: rgba(34, 197, 94, 0.2); }
 
 .tip-mini i {
   display: block;
@@ -1284,5 +899,126 @@ body {
   font-weight: 600;
 }
 
-/* --------------------------------------------------------------------------------------------------------------------- */
+.click-indicator {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  font-size: 0.7rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
 
+.tip-mini:hover .click-indicator {
+  opacity: 1;
+}
+
+.category-label {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.7rem;
+  display: block;
+  margin-top: 4px;
+}
+
+/* ===================== ABOUT MODAL ===================== */
+
+.about-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.about-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.about-row i {
+  font-size: 1.4rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.about-row strong {
+  display: block;
+  font-size: 0.92rem;
+  color: white;
+  margin-bottom: 4px;
+}
+
+.about-row p {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+}
+
+/* ===================== ANIMATIONS ===================== */
+
+.fade-up {
+  animation: fadeUp 1s ease;
+}
+
+@keyframes spinSmooth {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes loadingBar {
+  0%   { width: 0%; }
+  100% { width: 100%; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(35px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes modalSlideIn {
+  from { opacity: 0; transform: translateY(-50px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===================== RESPONSIVE ===================== */
+
+@media (max-width: 768px) {
+  body {
+    overflow-y: auto;
+  }
+
+  .page-wrapper {
+    padding: 16px;
+  }
+
+  .mobile-frame {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    max-width: 420px;
+    border-radius: 26px;
+  }
+
+  .brand-panel {
+    min-height: 260px;
+  }
+
+  .brand-content h1 {
+    font-size: 2.2rem;
+  }
+
+  .login-panel {
+    padding: 20px;
+  }
+
+  .login-card {
+    max-width: 100%;
+    padding: 24px 18px;
+  }
+}

@@ -8,16 +8,14 @@ from authlib.integrations.flask_client import OAuth
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image as keras_image
 
-#os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # only for local development
-
 app = Flask(__name__)
 app.secret_key = "ecosort_secret_key"
 
-app.config['SESSION_TYPE'] = 'filesystem'
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
-app.config['SESSION_COOKIE_SECURE'] = False  # Set to True only for HTTPS
-app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config["SESSION_TYPE"] = "filesystem"
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=10)
+app.config["SESSION_COOKIE_SECURE"] = False  # Set to True when using HTTPS
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
 @app.before_request
 def make_session_permanent():
@@ -29,34 +27,23 @@ DATABASE = "database.db"
 
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
-# ========== MODIFIED MODEL LOADING ==========
+# ===================== MODEL LOADING =====================
+
 MODEL_PATH = "model/waste_model.h5"
 
-# Check if model exists, if not train it
 if not os.path.exists(MODEL_PATH):
-    print("=" * 50)
-    print("Model not found! Training new model...")
-    print("=" * 50)
-    
-    # Create model directory
+    print("Model not found — training now...")
     os.makedirs("model", exist_ok=True)
-    
-    # Run training script
     import train_model
-    
-    print("=" * 50)
-    print("Model training complete!")
-    print("=" * 50)
+    print("Model training complete.")
 
-# Now load the model
 model = load_model(MODEL_PATH)
 class_names = ["biodegradable", "non_recyclable", "recyclable"]
-# ========== END MODIFIED SECTION ==========
 
+# ===================== DATABASE =====================
 
 def get_db_connection():
-    conn = sqlite3.connect(DATABASE)
-    return conn
+    return sqlite3.connect(DATABASE)
 
 
 def init_db():
@@ -88,6 +75,7 @@ def init_db():
     conn.commit()
     conn.close()
 
+# ===================== HELPERS =====================
 
 def predict_waste(image_path):
     img = keras_image.load_img(image_path, target_size=(224, 224))
@@ -99,23 +87,13 @@ def predict_waste(image_path):
     confidence = float(np.max(predictions[0])) * 100
 
     label_map = {
-        "biodegradable": (
-            "Biodegradable",
-            "Place this item in the biodegradable waste bin."
-        ),
-        "recyclable": (
-            "Recyclable",
-            "Place this item in the recyclable waste bin."
-        ),
-        "non_recyclable": (
-            "Non-recyclable",
-            "Place this item in the non-recyclable waste bin."
-        )
+        "biodegradable":  ("Biodegradable",  "Place this item in the biodegradable waste bin."),
+        "recyclable":     ("Recyclable",      "Place this item in the recyclable waste bin."),
+        "non_recyclable": ("Non-recyclable",  "Place this item in the non-recyclable waste bin."),
     }
 
     raw_label = class_names[predicted_index]
     prediction, tip = label_map[raw_label]
-
     return prediction, f"{confidence:.2f}%", tip
 
 
@@ -128,35 +106,23 @@ def find_or_create_oauth_user(name, email):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT id, name, email, password
-        FROM users
-        WHERE email = ?
-    """, (email,))
+    cursor.execute("SELECT id, name, email, password FROM users WHERE email = ?", (email,))
     user = cursor.fetchone()
 
     if not user:
-        placeholder_password = "oauth_user_no_local_password"
-        cursor.execute("""
-            INSERT INTO users (name, email, password)
-            VALUES (?, ?, ?)
-        """, (name, email, placeholder_password))
+        cursor.execute(
+            "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
+            (name, email, "oauth_user_no_local_password")
+        )
         conn.commit()
-
-        cursor.execute("""
-            SELECT id, name, email, password
-            FROM users
-            WHERE email = ?
-        """, (email,))
+        cursor.execute("SELECT id, name, email, password FROM users WHERE email = ?", (email,))
         user = cursor.fetchone()
 
     conn.close()
     return user
 
+# ===================== OAUTH =====================
 
-# -------------------------
-# OAuth setup
-# -------------------------
 oauth = OAuth(app)
 
 google = oauth.register(
@@ -164,12 +130,10 @@ google = oauth.register(
     client_id=os.environ.get("GOOGLE_CLIENT_ID"),
     client_secret=os.environ.get("GOOGLE_CLIENT_SECRET"),
     server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
-    client_kwargs={
-        "scope": "openid email profile"
-    }
+    client_kwargs={"scope": "openid email profile"},
 )
 
-facebook = oauth.register (
+facebook = oauth.register(
     name="facebook",
     client_id=os.environ.get("FACEBOOK_CLIENT_ID"),
     client_secret=os.environ.get("FACEBOOK_CLIENT_SECRET"),
@@ -179,13 +143,11 @@ facebook = oauth.register (
     userinfo_endpoint="https://graph.facebook.com/me?fields=id,name,email",
     client_kwargs={
         "scope": "email public_profile",
-        "token_endpoint_auth_method": "client_secret_post"
-    }
+        "token_endpoint_auth_method": "client_secret_post",
+    },
 )
 
-print("GOOGLE_CLIENT_ID =", os.environ.get("GOOGLE_CLIENT_ID"))
-print("GOOGLE_CLIENT_SECRET exists =", bool(os.environ.get("GOOGLE_CLIENT_SECRET")))
-
+# ===================== AUTH ROUTES =====================
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -196,12 +158,11 @@ def register():
 
         conn = get_db_connection()
         cursor = conn.cursor()
-
         try:
-            cursor.execute("""
-                INSERT INTO users (name, email, password)
-                VALUES (?, ?, ?)
-            """, (name, email, password))
+            cursor.execute(
+                "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
+                (name, email, password)
+            )
             conn.commit()
             conn.close()
             flash("Registration successful. You can now log in.", "success")
@@ -222,11 +183,7 @@ def login():
 
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("""
-            SELECT id, name, email, password
-            FROM users
-            WHERE email = ?
-        """, (email,))
+        cursor.execute("SELECT id, name, email, password FROM users WHERE email = ?", (email,))
         user = cursor.fetchone()
         conn.close()
 
@@ -258,7 +215,6 @@ def forgot_password():
 
         conn = get_db_connection()
         cursor = conn.cursor()
-
         cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
         user = cursor.fetchone()
 
@@ -267,11 +223,7 @@ def forgot_password():
             flash("No account found with that email.", "error")
             return redirect(url_for("forgot_password"))
 
-        cursor.execute("""
-            UPDATE users
-            SET password = ?
-            WHERE email = ?
-        """, (new_password, email))
+        cursor.execute("UPDATE users SET password = ? WHERE email = ?", (new_password, email))
         conn.commit()
         conn.close()
 
@@ -280,44 +232,25 @@ def forgot_password():
 
     return render_template("forgot_password.html")
 
-
-# -------------------------
-# Google OAuth
-# -------------------------
-
+# ===================== GOOGLE OAUTH =====================
 
 @app.route("/login/google")
 def google_login():
     if not os.environ.get("GOOGLE_CLIENT_ID") or not os.environ.get("GOOGLE_CLIENT_SECRET"):
         flash("Google OAuth credentials are missing.", "error")
         return redirect(url_for("login"))
-    
+
     redirect_uri = url_for("google_callback", _external=True)
     state = os.urandom(16).hex()
-    session['oauth_state'] = state
-    session.modified = True  # FORCE SAVE
-    print(f"Storing state: {state}")  # Debug
+    session["oauth_state"] = state
+    session.modified = True
     return google.authorize_redirect(redirect_uri, state=state)
 
 
 @app.route("/login/google/callback")
 def google_callback():
     try:
-        # Debug: Check what we received vs what we stored
-        received_state = request.args.get('state')
-        stored_state = session.get('oauth_state')
-        print(f"DEBUG - Received state: {received_state}")
-        print(f"DEBUG - Stored state: {stored_state}")
-        
-        # TEMPORARY: Skip state verification for debugging
-        # Remove this check once session persistence is fixed
-        if stored_state and received_state != stored_state:
-            print("WARNING: State mismatch detected, but allowing login for debugging")
-        
-        # Clear state from session
-        session.pop('oauth_state', None)
-        
-        # Get access token
+        session.pop("oauth_state", None)
         token = google.authorize_access_token()
         resp = google.get("https://www.googleapis.com/oauth2/v3/userinfo", token=token)
         user_info = resp.json()
@@ -327,19 +260,15 @@ def google_callback():
 
         user = find_or_create_oauth_user(name, email)
         login_user(user)
-
         flash(f"Welcome, {name}!", "success")
         return redirect(url_for("index"))
 
     except Exception as e:
-        print(f"Google OAuth error: {e}")
         flash(f"Google login failed: {e}", "error")
         return redirect(url_for("login"))
 
+# ===================== FACEBOOK OAUTH =====================
 
-# -------------------------
-# Facebook OAuth
-# -------------------------
 @app.route("/login/facebook")
 def facebook_login():
     if not os.environ.get("FACEBOOK_CLIENT_ID") or not os.environ.get("FACEBOOK_CLIENT_SECRET"):
@@ -347,42 +276,35 @@ def facebook_login():
         return redirect(url_for("login"))
 
     redirect_uri = url_for("facebook_callback", _external=True)
-    session['oauth_state'] = os.urandom(16).hex()
+    session["oauth_state"] = os.urandom(16).hex()
     return facebook.authorize_redirect(redirect_uri)
 
 
 @app.route("/login/facebook/callback")
 def facebook_callback():
     try:
-        received_state = request.args.get('state')
-        stored_state = session.get('oauth_state')
-        print(f"DEBUG - Received state: {received_state}")
-        print(f"DEBUG - Stored state: {stored_state}")
-        
-        # TEMPORARY: Skip state verification for debugging
-        if stored_state and received_state != stored_state:
-            print("WARNING: State mismatch detected, but allowing login for debugging")
-        
-        session.pop('oauth_state', None)
-        
+        session.pop("oauth_state", None)
         token = facebook.authorize_access_token()
         resp = facebook.get("me?fields=id,name,email", token=token)
         profile = resp.json()
+
+        if not profile or "email" not in profile:
+            flash("Facebook login failed — email not provided.", "error")
+            return redirect(url_for("login"))
 
         email = profile.get("email")
         name = profile.get("name", "Facebook User")
 
         user = find_or_create_oauth_user(name, email)
         login_user(user)
-
         flash(f"Welcome, {name}!", "success")
         return redirect(url_for("index"))
 
     except Exception as e:
-        print(f"Facebook OAuth error: {e}")
         flash(f"Facebook login failed: {e}", "error")
         return redirect(url_for("login"))
 
+# ===================== MAIN ROUTES =====================
 
 @app.route("/logout")
 def logout():
@@ -401,38 +323,28 @@ def index():
             return redirect(url_for("index"))
 
         image = request.files["image"]
-
         if image.filename == "":
             flash("Please choose an image file.", "error")
             return redirect(url_for("index"))
 
-        original_filename = image.filename
-        file_ext = os.path.splitext(original_filename)[1].lower()
+        file_ext = os.path.splitext(image.filename)[1].lower()
         unique_filename = f"{uuid4().hex}{file_ext}"
-
         saved_file_path = os.path.join(app.config["UPLOAD_FOLDER"], unique_filename)
         image.save(saved_file_path)
 
         db_image_path = f"uploads/{unique_filename}"
-
         prediction, confidence, tip = predict_waste(saved_file_path)
 
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO scans (user_id, image_path, prediction, confidence, tip)
-            VALUES (?, ?, ?, ?, ?)
-        """, (session["user_id"], db_image_path, prediction, confidence, tip))
+        cursor.execute(
+            "INSERT INTO scans (user_id, image_path, prediction, confidence, tip) VALUES (?, ?, ?, ?, ?)",
+            (session["user_id"], db_image_path, prediction, confidence, tip)
+        )
         conn.commit()
         conn.close()
 
-        return render_template(
-            "result.html",
-            prediction=prediction,
-            confidence=confidence,
-            tip=tip,
-            image=db_image_path
-        )
+        return render_template("result.html", prediction=prediction, confidence=confidence, tip=tip, image=db_image_path)
 
     return render_template("index.html", user_name=session["user_name"])
 
@@ -442,50 +354,26 @@ def history():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    # Get filter parameter from query string
-    filter_type = request.args.get('filter', 'all')
-    
+    filter_type = request.args.get("filter", "all")
     conn = get_db_connection()
     cursor = conn.cursor()
-    
-    # Build query based on filter
-    if filter_type == 'reduce':
-        # Non-recyclable items -> focus on reducing
-        cursor.execute("""
-            SELECT id, image_path, prediction, confidence, tip, scanned_at
-            FROM scans
-            WHERE user_id = ? AND (prediction LIKE '%non_recyclable%' OR prediction LIKE '%non-recyclable%' OR prediction LIKE '%Non-recyclable%')
-            ORDER BY id DESC
-        """, (session["user_id"],))
+
+    base_query = "SELECT id, image_path, prediction, confidence, tip, scanned_at FROM scans WHERE user_id = ? {condition} ORDER BY id DESC"
+
+    if filter_type == "reduce":
+        condition = "AND (prediction LIKE '%non_recyclable%' OR prediction LIKE '%non-recyclable%' OR prediction LIKE '%Non-recyclable%')"
         filter_title = "Reduce History (Non-recyclable Items)"
-    elif filter_type == 'reuse':
-        # Biodegradable items -> can be composted/reused
-        cursor.execute("""
-            SELECT id, image_path, prediction, confidence, tip, scanned_at
-            FROM scans
-            WHERE user_id = ? AND (prediction LIKE '%biodegradable%' OR prediction LIKE '%Biodegradable%')
-            ORDER BY id DESC
-        """, (session["user_id"],))
+    elif filter_type == "reuse":
+        condition = "AND (prediction LIKE '%biodegradable%' OR prediction LIKE '%Biodegradable%')"
         filter_title = "Reuse History (Biodegradable Items)"
-    elif filter_type == 'recycle':
-        # Recyclable items
-        cursor.execute("""
-            SELECT id, image_path, prediction, confidence, tip, scanned_at
-            FROM scans
-            WHERE user_id = ? AND (prediction LIKE '%recyclable%' OR prediction LIKE '%Recyclable%') AND prediction NOT LIKE '%non%'
-            ORDER BY id DESC
-        """, (session["user_id"],))
+    elif filter_type == "recycle":
+        condition = "AND (prediction LIKE '%recyclable%' OR prediction LIKE '%Recyclable%') AND prediction NOT LIKE '%non%'"
         filter_title = "Recycle History (Recyclable Items)"
     else:
-        # All items
-        cursor.execute("""
-            SELECT id, image_path, prediction, confidence, tip, scanned_at
-            FROM scans
-            WHERE user_id = ?
-            ORDER BY id DESC
-        """, (session["user_id"],))
+        condition = ""
         filter_title = "All Scan History"
-    
+
+    cursor.execute(base_query.format(condition=condition), (session["user_id"],))
     scans = cursor.fetchall()
     conn.close()
 
@@ -495,4 +383,4 @@ def history():
 if __name__ == "__main__":
     init_db()
     port = int(os.environ.get("PORT", 8000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(host="localhost", port=port, debug=False)
