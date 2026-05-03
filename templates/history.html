@@ -60,9 +60,9 @@
           <div class="history-list">
             {% if scans %}
               {% for scan in scans %}
-              <div class="history-item" onclick="openModal('{{ scan[1] }}', '{{ scan[2] }}', '{{ scan[3] }}', '{{ scan[4] }}', '{{ scan[5] }}')">
+              <div class="history-item" onclick="openModal('{{ scan[1] }}', '{{ scan[2] }}', '{{ scan[3] }}', '{{ scan[4] }}', '{{ scan[5] }}', '{{ scan[6] }}')" data-probs="{{ scan[6] }}">
                 <div class="history-top">
-                  <img src="{{ url_for('static', filename=scan[1]) }}" alt="Scanned Waste">
+                  <img src="{{ url_for('static', filename=scan[1]) }}" alt="Scanned Waste" style="width:100%;height:160px;object-fit:contain;background:rgba(0,0,0,0.2);display:block;">
                   <span class="click-hint"><i class="fa-solid fa-expand"></i> Click to analyze</span>
                 </div>
                 <div class="history-details">
@@ -99,12 +99,12 @@
 
   <!-- Modal for RRR Analysis -->
   <div id="analysisModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-height:90vh;overflow-y:auto;">
       <div class="modal-header">
         <h3><i class="fa-solid fa-chart-pie"></i> Waste Analysis</h3>
         <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <img id="modalImage" class="modal-image" src="" alt="Waste Item">
+      <img id="modalImage" class="modal-image" src="" alt="Waste Item" style="width:100%;height:220px;object-fit:contain;background:rgba(0,0,0,0.25);border-radius:16px;margin-bottom:16px;display:block;">
       <div class="history-details" style="margin-bottom: 15px;">
         <p><strong>AI Prediction:</strong> <span id="modalPrediction"></span></p>
         <p><strong>Confidence:</strong> <span id="modalConfidence"></span></p>

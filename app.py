@@ -9,13 +9,18 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image as keras_image
 
 app = Flask(__name__)
-app.secret_key = "ecosort_secret_key"
+app.secret_key = os.environ.get("SECRET_KEY", "ecosort_secret_key_change_in_prod")
+
+# Fix redirect URIs when behind a proxy (Render uses HTTPS)
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=10)
 app.config["SESSION_COOKIE_SECURE"] = False  # Set to True when using HTTPS
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["PREFERRED_URL_SCHEME"] = "https"
 
 @app.before_request
 def make_session_permanent():
@@ -67,10 +72,18 @@ def init_db():
             prediction TEXT NOT NULL,
             confidence TEXT NOT NULL,
             tip TEXT NOT NULL,
+            probs TEXT NOT NULL DEFAULT '0|0|0',
             scanned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(user_id) REFERENCES users(id)
         )
     """)
+
+    # Migration: add probs column if it doesn't exist (for existing databases)
+    try:
+        cursor.execute("ALTER TABLE scans ADD COLUMN probs TEXT NOT NULL DEFAULT '0|0|0'")
+        conn.commit()
+    except Exception:
+        pass  # Column already exists
 
     conn.commit()
     conn.close()
@@ -83,8 +96,9 @@ def predict_waste(image_path):
     img_array = np.expand_dims(img_array, axis=0) / 255.0
 
     predictions = model.predict(img_array, verbose=0)
-    predicted_index = np.argmax(predictions[0])
-    confidence = float(np.max(predictions[0])) * 100
+    probs = predictions[0]  # shape: (3,) — one prob per class
+    predicted_index = int(np.argmax(probs))
+    confidence = float(np.max(probs)) * 100
 
     label_map = {
         "biodegradable":  ("Biodegradable",  "Place this item in the biodegradable waste bin."),
@@ -94,7 +108,14 @@ def predict_waste(image_path):
 
     raw_label = class_names[predicted_index]
     prediction, tip = label_map[raw_label]
-    return prediction, f"{confidence:.2f}%", tip
+
+    # Build a name→prob dict aligned to our fixed class order
+    # class_names order from training: ["biodegradable", "non_recyclable", "recyclable"]
+    # We store as "biodegradable|non_recyclable|recyclable" probabilities (0-100, rounded)
+    prob_dict = {class_names[i]: round(float(probs[i]) * 100, 2) for i in range(len(class_names))}
+    prob_str = f"{prob_dict.get('biodegradable', 0):.2f}|{prob_dict.get('non_recyclable', 0):.2f}|{prob_dict.get('recyclable', 0):.2f}"
+
+    return prediction, f"{confidence:.2f}%", tip, prob_str
 
 
 def login_user(user):
@@ -127,16 +148,16 @@ oauth = OAuth(app)
 
 google = oauth.register(
     name="google",
-    client_id=os.environ.get("GOOGLE_CLIENT_ID"),
-    client_secret=os.environ.get("GOOGLE_CLIENT_SECRET"),
+    client_id=os.environ.get("GOOGLE_CLIENT_ID", "99512363553-c6vpqhkhitvt2cn8ralo9h04gkk474uk.apps.googleusercontent.com"),
+    client_secret=os.environ.get("GOOGLE_CLIENT_SECRET", "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"),
     server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
     client_kwargs={"scope": "openid email profile"},
 )
 
 facebook = oauth.register(
     name="facebook",
-    client_id=os.environ.get("FACEBOOK_CLIENT_ID"),
-    client_secret=os.environ.get("FACEBOOK_CLIENT_SECRET"),
+    client_id=os.environ.get("FACEBOOK_CLIENT_ID", "2133400210781599"),
+    client_secret=os.environ.get("FACEBOOK_CLIENT_SECRET", "c14a167529f2c2d332731790d1344f5d"),
     access_token_url="https://graph.facebook.com/oauth/access_token",
     authorize_url="https://www.facebook.com/dialog/oauth",
     api_base_url="https://graph.facebook.com/",
@@ -236,27 +257,26 @@ def forgot_password():
 
 @app.route("/login/google")
 def google_login():
-    if not os.environ.get("GOOGLE_CLIENT_ID") or not os.environ.get("GOOGLE_CLIENT_SECRET"):
+    if not (os.environ.get("GOOGLE_CLIENT_ID") or "99512363553" in "99512363553-c6vpqhkhitvt2cn8ralo9h04gkk474uk.apps.googleusercontent.com"):
         flash("Google OAuth credentials are missing.", "error")
         return redirect(url_for("login"))
 
     redirect_uri = url_for("google_callback", _external=True)
-    state = os.urandom(16).hex()
-    session["oauth_state"] = state
-    session.modified = True
-    return google.authorize_redirect(redirect_uri, state=state)
+    return google.authorize_redirect(redirect_uri)
 
 
 @app.route("/login/google/callback")
 def google_callback():
     try:
-        session.pop("oauth_state", None)
         token = google.authorize_access_token()
-        resp = google.get("https://www.googleapis.com/oauth2/v3/userinfo", token=token)
-        user_info = resp.json()
+        user_info = token.get("userinfo") or google.get("https://www.googleapis.com/oauth2/v3/userinfo", token=token).json()
 
         email = user_info.get("email")
         name = user_info.get("name", "Google User")
+
+        if not email:
+            flash("Google login failed — email not provided.", "error")
+            return redirect(url_for("login"))
 
         user = find_or_create_oauth_user(name, email)
         login_user(user)
@@ -264,32 +284,26 @@ def google_callback():
         return redirect(url_for("index"))
 
     except Exception as e:
-        flash(f"Google login failed: {e}", "error")
+        flash(f"Google login failed: {str(e)}", "error")
         return redirect(url_for("login"))
 
 # ===================== FACEBOOK OAUTH =====================
 
 @app.route("/login/facebook")
 def facebook_login():
-    if not os.environ.get("FACEBOOK_CLIENT_ID") or not os.environ.get("FACEBOOK_CLIENT_SECRET"):
-        flash("Facebook OAuth credentials are missing.", "error")
-        return redirect(url_for("login"))
-
     redirect_uri = url_for("facebook_callback", _external=True)
-    session["oauth_state"] = os.urandom(16).hex()
     return facebook.authorize_redirect(redirect_uri)
 
 
 @app.route("/login/facebook/callback")
 def facebook_callback():
     try:
-        session.pop("oauth_state", None)
         token = facebook.authorize_access_token()
         resp = facebook.get("me?fields=id,name,email", token=token)
         profile = resp.json()
 
         if not profile or "email" not in profile:
-            flash("Facebook login failed — email not provided.", "error")
+            flash("Facebook login failed — email not provided. Make sure your Facebook account has a verified email.", "error")
             return redirect(url_for("login"))
 
         email = profile.get("email")
@@ -301,7 +315,7 @@ def facebook_callback():
         return redirect(url_for("index"))
 
     except Exception as e:
-        flash(f"Facebook login failed: {e}", "error")
+        flash(f"Facebook login failed: {str(e)}", "error")
         return redirect(url_for("login"))
 
 # ===================== MAIN ROUTES =====================
@@ -333,18 +347,18 @@ def index():
         image.save(saved_file_path)
 
         db_image_path = f"uploads/{unique_filename}"
-        prediction, confidence, tip = predict_waste(saved_file_path)
+        prediction, confidence, tip, prob_str = predict_waste(saved_file_path)
 
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO scans (user_id, image_path, prediction, confidence, tip) VALUES (?, ?, ?, ?, ?)",
-            (session["user_id"], db_image_path, prediction, confidence, tip)
+            "INSERT INTO scans (user_id, image_path, prediction, confidence, tip, probs) VALUES (?, ?, ?, ?, ?, ?)",
+            (session["user_id"], db_image_path, prediction, confidence, tip, prob_str)
         )
         conn.commit()
         conn.close()
 
-        return render_template("result.html", prediction=prediction, confidence=confidence, tip=tip, image=db_image_path)
+        return render_template("result.html", prediction=prediction, confidence=confidence, tip=tip, image=db_image_path, probs=prob_str)
 
     return render_template("index.html", user_name=session["user_name"])
 
@@ -358,7 +372,7 @@ def history():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    base_query = "SELECT id, image_path, prediction, confidence, tip, scanned_at FROM scans WHERE user_id = ? {condition} ORDER BY id DESC"
+    base_query = "SELECT id, image_path, prediction, confidence, tip, scanned_at, COALESCE(probs,'0|0|0') FROM scans WHERE user_id = ? {condition} ORDER BY id DESC"
 
     if filter_type == "reduce":
         condition = "AND (prediction LIKE '%non_recyclable%' OR prediction LIKE '%non-recyclable%' OR prediction LIKE '%Non-recyclable%')"

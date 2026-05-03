@@ -21,8 +21,9 @@ window.addEventListener("load", () => {
  * @param {string} confidence - Confidence percentage
  * @param {string} tip        - Waste disposal tip
  * @param {string} date       - Scan date
+ * @param {string} probs      - Pipe-separated AI probabilities: "biodegradable|non_recyclable|recyclable"
  */
-function openModal(imagePath, prediction, confidence, tip, date) {
+function openModal(imagePath, prediction, confidence, tip, date, probs) {
   const modal = document.getElementById("analysisModal");
 
   document.getElementById("modalImage").src = "/static/" + imagePath;
@@ -32,19 +33,44 @@ function openModal(imagePath, prediction, confidence, tip, date) {
   document.getElementById("modalTip").textContent = tip;
 
   let reduce, reuse, recycle;
-  const predLower = prediction.toLowerCase();
 
+  // Try to use real AI probabilities first
+  if (probs && probs !== "0|0|0" && probs.includes("|")) {
+    const parts = probs.split("|").map(Number);
+    // probs are stored as: biodegradable | non_recyclable | recyclable
+    const bioProb  = parts[0] || 0;
+    const nonProb  = parts[1] || 0;
+    const recProb  = parts[2] || 0;
+
+    // Map AI probabilities to RRR framework:
+    // Reduce  ← non_recyclable probability (minimize waste that can't be processed)
+    // Reuse   ← biodegradable probability  (compost / organic reuse)
+    // Recycle ← recyclable probability     (send to recycling)
+    const total = bioProb + nonProb + recProb || 100;
+    reduce  = Math.round((nonProb / total) * 100);
+    reuse   = Math.round((bioProb / total) * 100);
+    recycle = 100 - reduce - reuse; // ensure they sum to 100
+  } else {
+    // Fallback to heuristics if probs not stored (old records)
+    const predLower = prediction.toLowerCase();
+    if (predLower.includes("non_recyclable") || predLower.includes("non-recyclable")) {
+      reduce = 70; reuse = 20; recycle = 10;
+    } else if (predLower.includes("recyclable")) {
+      reduce = 10; reuse = 15; recycle = 75;
+    } else if (predLower.includes("biodegradable")) {
+      reduce = 15; reuse = 70; recycle = 15;
+    } else {
+      reduce = 33; reuse = 33; recycle = 34;
+    }
+  }
+
+  // Highlight the dominant action card
+  const predLower = prediction.toLowerCase();
   if (predLower.includes("non_recyclable") || predLower.includes("non-recyclable")) {
-    reduce = 70; reuse = 20; recycle = 10;
     highlightCard("reduceCard");
-  } else if (predLower.includes("recyclable")) {
-    reduce = 20; reuse = 30; recycle = 50;
-    highlightCard("recycleCard");
   } else if (predLower.includes("biodegradable")) {
-    reduce = 30; reuse = 40; recycle = 30;
     highlightCard("reuseCard");
   } else {
-    reduce = 33; reuse = 33; recycle = 34;
     highlightCard("recycleCard");
   }
 
